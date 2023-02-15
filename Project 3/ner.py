@@ -1,11 +1,12 @@
 """Named Entity Recognition as a classification task.
 
-Author: Kristina Striegnitz and <YOUR NAME HERE>
+Author: Kristina Striegnitz and Diep (Emma) Vu
 
 <HONOR CODE STATEMENT HERE>
 
 Complete this file for part 1 of the project.
 """
+import time
 from nltk.corpus import conll2002
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -20,11 +21,49 @@ def getfeats(word, o):
     o = str(o)
     features = [
         (o + 'word', word),
-        # TODO: add more features here.
+        (o + 'lower', word.lower()),
+        (o + 'upper', word.upper()),
+        (o + 'hyphen', contain_hyphen(word)),
+        (o + 'digit', contain_digits(word)),
+        (o + 'prefix1', word[:1]),
+        (o + 'prefix2', word[:2]), 
+        (o + 'prefix3', word[:3]), 
+        (o + 'prefix4', word[:4]), 
+        (o + 'suffix1', word[-1:]),
+        (o + 'suffix2', word[-2:]), 
+        (o + 'suffix3', word[-3:]), 
+        (o + 'suffix4', word[-4:]),
+        (o + 'shape', word_shape(word)),
+
     ]
     return features
-    
 
+def contain_hyphen(word):
+    """Check if the word contain any hyphens"""
+    return '-' in word
+
+def contain_digits(word):
+    """Check if the word contain any digits"""
+    for char in word:
+        if char.isdigit():
+            return True
+    return False
+
+def word_shape(word):
+    """Represent the abstract letter pattern of the word by mapping lower-case letters to 'x', upper-case to 'X', numbers to 'd', and retaining punctuation"""
+    new_word = ''
+    for char in word:
+        if char.isupper():
+            new_word += 'X'
+        elif char.islower():
+            new_word += 'x'
+        elif char.isdigit():
+            new_word += 'd'
+        else:
+            new_word += char
+    return new_word
+
+    
 def word2features(sent, i):
     """Generate all features for the word at position i in the
     sentence. The features are based on the word itself as well as
@@ -40,6 +79,7 @@ def word2features(sent, i):
     return features
 
 if __name__ == "__main__":
+    start = time.time()
     print("\nLoading the data ...")
     train_sents = list(conll2002.iob_sents('esp.train'))
     dev_sents = list(conll2002.iob_sents('esp.testa'))
@@ -72,7 +112,7 @@ if __name__ == "__main__":
     # test_sents and run it one last time to produce the output file
     # results_classifier.txt. That is the results_classifier.txt you
     # should hand in.
-    for sent in dev_sents:
+    for sent in test_sents:
         for i in range(len(sent)):
             feats = dict(word2features(sent,i))
             test_feats.append(feats)
@@ -87,7 +127,7 @@ if __name__ == "__main__":
     # format is: word gold pred
     j = 0
     with open("results_classifier.txt", "w") as out:
-        for sent in dev_sents:
+        for sent in test_sents:
             for i in range(len(sent)):
                 word = sent[i][0]
                 gold = sent[i][-1]
@@ -96,6 +136,8 @@ if __name__ == "__main__":
                 out.write("{}\t{}\t{}\n".format(word,gold,pred))
         out.write("\n")
 
+    end = time.time()
+    print("Time elapsed:", end - start)
     print("Now run: python3 conlleval.py results_classifier.txt")
 
 

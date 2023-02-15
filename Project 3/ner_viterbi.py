@@ -1,6 +1,6 @@
 """Named Entity Recognition as a sequence tagging task.
 
-Author: Kristina Striegnitz and <YOUR NAME HERE>
+Author: Kristina Striegnitz and Diep (Emma) Vu
 
 <HONOR CODE STATEMENT HERE>
 
@@ -16,7 +16,7 @@ import math
 import numpy as np
 # TODO (optional): Complete the class MEMM
 from memm import MEMM
-
+import ner
 #################################
 #
 # Word classifier
@@ -28,11 +28,12 @@ def getfeats(word, o):
     classify. Return a list of tuples of the form (feature_name,
     feature_value).
     """
-    o = str(o)
-    features = [
-        (o + 'word', word),
-        # TODO: add more features here.
-    ]
+    # o = str(o)
+    # features = [
+    #     (o + 'word', word),
+    #     # TODO: add more features here.
+    # ]
+    features = ner.getfeats(word, o)
     return features
     
 
