@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_fscore_support
 
-def getfeats(word, o):
+def getfeats(word, o, pos=None):
     """Take a word and its offset with respect to the word we are trying
     to classify. Return a list of tuples of the form (feature_name,
     feature_value).
@@ -25,17 +25,21 @@ def getfeats(word, o):
         (o + 'upper', word.upper()),
         (o + 'hyphen', contain_hyphen(word)),
         (o + 'digit', contain_digits(word)),
-        (o + 'prefix1', word[:1]),
-        (o + 'prefix2', word[:2]), 
-        (o + 'prefix3', word[:3]), 
-        (o + 'prefix4', word[:4]), 
-        (o + 'suffix1', word[-1:]),
-        (o + 'suffix2', word[-2:]), 
-        (o + 'suffix3', word[-3:]), 
-        (o + 'suffix4', word[-4:]),
         (o + 'shape', word_shape(word)),
+        (o + 'short_shape', short_word_shape(word)),
+        (o + 'capitalize', word[0].isupper()),
+        (o + 'tag', pos),
 
     ]
+
+    #get the prefix and suffix of different character length
+    char_length = 4
+    for i in range(1, char_length + 1): #maximum length of 4
+        if len(word) >= i:
+            prefix = word[:i]
+            suffix = word[-i:]
+            features.append((o + f'prefix{i}', prefix)) 
+            features.append((o + f'suffix{i}', suffix))
     return features
 
 def contain_hyphen(word):
@@ -63,6 +67,18 @@ def word_shape(word):
             new_word += char
     return new_word
 
+def short_word_shape(word):
+    """Represent the abstract letter pattern of the word using shorter word shape features by removing duplicates"""
+    shape = word_shape(word)
+    # Remove consecutive character types
+    new_word = ''
+    prev_type = None
+    for char in shape:
+        if char != prev_type:
+            new_word += char
+        prev_type = char
+    return new_word
+
     
 def word2features(sent, i):
     """Generate all features for the word at position i in the
@@ -70,11 +86,13 @@ def word2features(sent, i):
     neighboring words.
     """
     features = []
+    window_size = 3
     # the window around the token (o stands for offset)
-    for o in [-1,0,1]:
+    for o in range(-window_size, window_size + 1):
         if i+o >= 0 and i+o < len(sent):
             word = sent[i+o][0]
-            featlist = getfeats(word, o)
+            pos = sent[i+o][1]
+            featlist = getfeats(word, o, pos)
             features.extend(featlist)
     return features
 
@@ -112,7 +130,7 @@ if __name__ == "__main__":
     # test_sents and run it one last time to produce the output file
     # results_classifier.txt. That is the results_classifier.txt you
     # should hand in.
-    for sent in test_sents:
+    for sent in dev_sents:
         for i in range(len(sent)):
             feats = dict(word2features(sent,i))
             test_feats.append(feats)
@@ -127,7 +145,7 @@ if __name__ == "__main__":
     # format is: word gold pred
     j = 0
     with open("results_classifier.txt", "w") as out:
-        for sent in test_sents:
+        for sent in dev_sents:
             for i in range(len(sent)):
                 word = sent[i][0]
                 gold = sent[i][-1]
