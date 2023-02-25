@@ -2,8 +2,8 @@
 
 Author: Kristina Striegnitz and Diep (Emma) Vu
 
-<HONOR CODE STATEMENT HERE>
-
+I affirm that I have carried out my academic endeavors with full
+academic honesty.
 Complete this file for part 1 of the project.
 """
 import time
@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_fscore_support
 
-def getfeats(word, o, pos=None):
+def getfeats(word, o):
     """Take a word and its offset with respect to the word we are trying
     to classify. Return a list of tuples of the form (feature_name,
     feature_value).
@@ -21,14 +21,13 @@ def getfeats(word, o, pos=None):
     o = str(o)
     features = [
         (o + 'word', word),
-        (o + 'lower', word.lower()),
-        (o + 'upper', word.upper()),
-        (o + 'hyphen', contain_hyphen(word)),
-        (o + 'digit', contain_digits(word)),
+        # (o + 'lower', word.lower()),
+        # (o + 'upper', word.upper()),
+        #(o + 'hyphen', contain_hyphen(word)), #not include hyphen increased F1 score
+        #(o + 'digit', contain_digits(word)),
         (o + 'shape', word_shape(word)),
         (o + 'short_shape', short_word_shape(word)),
         (o + 'capitalize', word[0].isupper()),
-        (o + 'tag', pos),
 
     ]
 
@@ -92,7 +91,8 @@ def word2features(sent, i):
         if i+o >= 0 and i+o < len(sent):
             word = sent[i+o][0]
             pos = sent[i+o][1]
-            featlist = getfeats(word, o, pos)
+            featlist = getfeats(word, o)
+            featlist.append((f'{o}tag', pos)) #add pos tag in the feature list
             features.extend(featlist)
     return features
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # test_sents and run it one last time to produce the output file
     # results_classifier.txt. That is the results_classifier.txt you
     # should hand in.
-    for sent in dev_sents:
+    for sent in test_sents:
         for i in range(len(sent)):
             feats = dict(word2features(sent,i))
             test_feats.append(feats)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # format is: word gold pred
     j = 0
     with open("results_classifier.txt", "w") as out:
-        for sent in dev_sents:
+        for sent in test_sents:
             for i in range(len(sent)):
                 word = sent[i][0]
                 gold = sent[i][-1]
