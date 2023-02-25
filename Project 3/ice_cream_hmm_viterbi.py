@@ -30,6 +30,8 @@ def viterbi(obs, hmm, pretty_print=False):
     # Calculate the Viterbi probabilities for the first step, i.e.,
     # the first observation: t = 0.
     for y in hmm.states:
+        print("hmm start prob",hmm.start_probs[y])
+        print("obs 0",obs[0])
         V[0][y] = logprob(hmm.start_probs[y]) + logprob(hmm.emit_probs[y][obs[0]])
         path[y] = [y]
  
@@ -42,7 +44,10 @@ def viterbi(obs, hmm, pretty_print=False):
             max_v = float('-inf')
             max_prev_state = None
             for prev_y in hmm.states:
+                print("prev prob",V[t-1][prev_y])
+                print("hmm trans prob",hmm.trans_probs[prev_y][y])
                 transition_prob = V[t-1][prev_y] + logprob(hmm.trans_probs[prev_y][y])
+                print("obs t", obs[t])
                 emission_prob = logprob(hmm.emit_probs[y][obs[t]])
                 v = transition_prob + emission_prob
                 if v > max_v:
