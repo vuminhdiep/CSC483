@@ -34,9 +34,9 @@ def getfeats(word, o):
         (o + 'word', word),
         # (o + 'lower', word.lower()),
         # (o + 'upper', word.upper()),
-        #(o + 'hyphen', contain_hyphen(word)),
+        # (o + 'hyphen', contain_hyphen(word)),
         # (o + 'digit', contain_digits(word)),
-        #(o + 'shape', word_shape(word)),
+        # (o + 'shape', word_shape(word)),
         (o + 'short_shape', short_word_shape(word)),
         (o + 'capitalize', word[0].isupper()),
 
@@ -131,7 +131,7 @@ def viterbi(obs, memm, pretty_print=False):
     """
     V = []
     paths =  np.array([[i] for i in range(len(memm.states))])
-    V.append(memm.predict_log_proba(obs[0], '<S>'))
+    V.append(memm.predict_log_proba(obs[0], '<S>')) #add the probability of the first word with the tag <S>
     
     # Run Viterbi for all of the subsequent steps/observations: t > 0.
     for t in range(1,len(obs)):
@@ -191,7 +191,7 @@ if __name__ == "__main__":
             # the previous word. And <S> if i is the first words in a
             # sentence.
             curr_state = sent[i][-1]
-            feats['prev_state'] = prev_state
+            feats['prev_state'] = prev_state #assign tag <S> for the first word
             train_feats.append(feats)
             train_labels.append(curr_state)
             prev_state = curr_state
@@ -216,7 +216,7 @@ if __name__ == "__main__":
     y_pred = []
     test_labels = []
     
-    for sent in dev_sents:
+    for sent in test_sents:
         # TODO: extract the feature representations for the words from
         # the sentence; use the viterbi algorithm to predict labels
         # for this sequence of words; add the result to y_pred
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     # format is: word gold pred
     j = 0
     with open("results_memm.txt", "w") as out:
-        for sent in dev_sents: 
+        for sent in test_sents: 
             for i in range(len(sent)):
                 word = sent[i][0]
                 gold = sent[i][-1]
