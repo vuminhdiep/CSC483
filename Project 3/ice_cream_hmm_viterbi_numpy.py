@@ -27,16 +27,22 @@ def viterbi(obs, hmm, pretty_print=False):
  
     # Calculate the Viterbi probabilities for the first step, i.e.,
     # the first observation o0.
-    o0 = hmm.encode(obs[0])
-    V.append(np.log(hmm.start_probs)+np.log(hmm.emit_probs[..., o0]))
+    o0 = hmm.encode(obs[0]) #take feature
+    print("o0", obs[0])
+    print("start_probs", hmm.start_probs)
+    print("emit_probs", hmm.emit_probs[..., o0])
+    V.append(np.log(hmm.start_probs)+np.log(hmm.emit_probs[..., o0])) #take from classifier
     paths =  np.array([[i] for i in range(len(hmm.states))])
     
     # Run Viterbi for all of the subsequent steps/observations: t > 0.
     for t in range(1,len(obs)):
         ot = hmm.encode(obs[t])
-        transition_probs = V[t-1] + np.log(hmm.trans_probs.T)
+        print("V[t-1]", V[t-1])
+        print("trans_prob.T", hmm.trans_probs.T)
+        print("emit_probs ot", hmm.emit_probs[..., ot])
+        transition_probs = V[t-1] + np.log(hmm.trans_probs.T) #shape log square matrix, num statexnum state
         emission_prob = np.log(hmm.emit_probs[..., ot])
-        V.append(np.max(transition_probs, axis=1) + emission_prob)
+        V.append(np.max(transition_probs, axis=1) + emission_prob) #get max of log prob, 
         max_prev_states = np.argmax(transition_probs, axis=1)
         paths = np.insert(paths[max_prev_states], t, range(len(hmm.states)), axis=1)
         
@@ -84,7 +90,7 @@ def example_hmm():
     ice_cream_hmm = HMM(states, vocabulary, start_probabilities, transition_probabilities, emission_probabilities)
     return ice_cream_hmm
 
-
+#loop throught each state, calculate log prob, put in matrix
 ###
 # Run example
 ###
